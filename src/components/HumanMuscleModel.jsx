@@ -3,17 +3,20 @@ import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { MUSCLE_GROUPS } from '../data/muscleData';
+import { generateMuscleStriationNormalMap, generateMuscleAmbientOcclusionMap } from '../utils/textureGenerator';
 
 /*
- * VOKAN 3D Anatomy — Authentic Écorché Anatomical Human Body Engine
+ * VOKAN 3D Anatomy — Hyper-Detailed Anatomical Écorché Body Engine
  * 
- * Modeled directly after classical muscular écorché anatomical diagrams:
- * - Real 3D Human Body GLB Mesh (28,391 vertices) with vertex load heatmaps
- * - Anatomical Tendons & Fascia Accents: White Linea Alba, Thoracolumbar Spinal
- *   Aponeurosis, Patellar Tendons, and Calcaneal Achilles Tendons matching the
- *   exact reference image!
- * - Grayscale Baseline: Deep metallic slate muscle bellies with white fascia
- * - Heatmap Mode: Dynamic workout volume intensity glowing overlay
+ * Directly modeled after classical 3D muscle anatomy écorché diagrams:
+ * - Real 3D Human Male Body Mesh (28,391 vertices) with vertex load heatmaps
+ * - Procedural Muscle Fiber Striation Normal Map & Ambient Occlusion Map
+ * - Anatomical Tendon & Fascia Structural Layers:
+ *   * Linea Alba & 3 Horizontal Abdominal Tendon Intersections
+ *   * Serratus Anterior Rib Interdigitation Fingers
+ *   * Thoracolumbar Spinal Aponeurosis Diamond & Spine Groove
+ *   * Iliotibial (IT) Lateral Thigh Fascia Bands
+ *   * Knee Patellar & Calcaneal Achilles Heel Tendons
  */
 
 const MUSCLE_REGIONS = {
@@ -78,32 +81,27 @@ function getInterpolatedHeatColor(intensity) {
   return HEAT_RAMP[idx].clone().lerp(HEAT_RAMP[idx + 1], t);
 }
 
-// Checks if a vertex is part of anatomical tendon / aponeurosis / fascia structures
 function isAnatomicalFasciaVertex(x, y, z) {
-  // 1. Linea Alba & Abdominal Tendinous Intersections (Front Core)
+  // 1. Linea Alba & Abdominal Tendinous Intersections
   if (z > 0.035 && y > 0.02 && y < 0.22) {
-    // Center Linea Alba line down the middle of abs
     if (Math.abs(x) < 0.005) return true;
-    // Horizontal tendinous intersections across six-pack abs
     if (Math.abs(x) < 0.035 && (Math.abs(y - 0.16) < 0.006 || Math.abs(y - 0.11) < 0.006 || Math.abs(y - 0.06) < 0.006)) {
       return true;
     }
   }
 
-  // 2. Thoracolumbar Spinal Aponeurosis / Fascia (Back Spine)
+  // 2. Thoracolumbar Spinal Aponeurosis / Fascia
   if (z < -0.032 && y > 0.02 && y < 0.32) {
-    // Spine vertical groove line
     if (Math.abs(x) < 0.006) return true;
-    // Lower back diamond lumbar fascia
     if (y < 0.12 && Math.abs(z) > 0.035 && Math.abs(x) < (0.025 - y * 0.06)) return true;
   }
 
-  // 3. Patellar & Knee Tendons (Front Knees)
+  // 3. Patellar & Knee Tendons
   if (y > -0.32 && y < -0.28 && Math.abs(z) > 0.02 && Math.abs(x) > 0.015 && Math.abs(x) < 0.04) {
     return true;
   }
 
-  // 4. Calcaneal Achilles Tendons (Rear Heel)
+  // 4. Calcaneal Achilles Tendons
   if (y > -0.48 && y < -0.40 && z < -0.015 && Math.abs(x) > 0.018 && Math.abs(x) < 0.035) {
     return true;
   }
@@ -133,7 +131,7 @@ function classifyBodyVertex(x, y, z) {
   return { id: bestId, dist: bestDist };
 }
 
-// 3D Anatomical Tendon & Fascia Overlay Component (Matching Reference Image)
+// 3D Anatomical Fascia & Tendon Overlay Component (Matching Reference Image)
 function AnatomicalFasciaOverlay() {
   return (
     <group position={[0, -0.05, 0]}>
@@ -151,6 +149,16 @@ function AnatomicalFasciaOverlay() {
         </mesh>
       ))}
 
+      {/* Serratus Anterior Rib Interdigitation Fingers */}
+      {[-0.038, 0.038].map((xPos, sideIdx) =>
+        [0.18, 0.14, 0.10].map((yPos, i) => (
+          <mesh key={`${sideIdx}-${i}`} position={[xPos, yPos, 0.045]} rotation={[0, sideIdx === 0 ? 0.3 : -0.3, -0.2]}>
+            <boxGeometry args={[0.022, 0.004, 0.004]} />
+            <meshStandardMaterial color="#E2E8F0" roughness={0.35} metalness={0.1} />
+          </mesh>
+        ))
+      )}
+
       {/* Back Thoracolumbar Spinal Aponeurosis (White Back Fascia Diamond) */}
       <mesh position={[0, 0.15, -0.042]} rotation={[0, 0, Math.PI / 4]}>
         <boxGeometry args={[0.055, 0.055, 0.004]} />
@@ -162,6 +170,14 @@ function AnatomicalFasciaOverlay() {
         <boxGeometry args={[0.006, 0.26, 0.004]} />
         <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
       </mesh>
+
+      {/* Iliotibial (IT) Lateral Thigh Fascia Bands */}
+      {[-0.042, 0.042].map((xPos, i) => (
+        <mesh key={i} position={[xPos, -0.18, 0.010]}>
+          <boxGeometry args={[0.004, 0.16, 0.012]} />
+          <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
+        </mesh>
+      ))}
 
       {/* Knee Patellar Tendons */}
       {[-0.028, 0.028].map((xPos, i) => (
@@ -195,6 +211,10 @@ export default function HumanMuscleModel({
 }) {
   const meshRef = useRef();
   const { scene } = useGLTF('/models/human_body.glb');
+
+  // Procedural muscle striation normal map & AO map
+  const muscleNormalMap = useMemo(() => generateMuscleStriationNormalMap(), []);
+  const muscleAoMap = useMemo(() => generateMuscleAmbientOcclusionMap(), []);
 
   // Body scale per physique mode
   const bodyScale = useMemo(() => {
@@ -247,7 +267,6 @@ export default function HumanMuscleModel({
       const vy = pos.getY(i);
       const vz = pos.getZ(i);
 
-      // Check if vertex lies on anatomical fascia/tendon lines (matching image!)
       if (isAnatomicalFasciaVertex(vx, vy, vz)) {
         colors[i * 3] = fasciaWhite.r;
         colors[i * 3 + 1] = fasciaWhite.g;
@@ -329,7 +348,7 @@ export default function HumanMuscleModel({
 
   return (
     <group position={[0, -0.05, 0]} scale={bodyScale}>
-      {/* Real 3D Anatomical Human Body Mesh */}
+      {/* Real 3D Anatomical Human Body Mesh with Muscle Striation Normal Map */}
       <mesh
         ref={meshRef}
         geometry={bodyGeometry}
@@ -341,12 +360,16 @@ export default function HumanMuscleModel({
       >
         <meshPhysicalMaterial
           vertexColors
-          roughness={0.32}
-          metalness={0.18}
+          normalMap={muscleNormalMap}
+          normalScale={new THREE.Vector2(0.85, 0.85)}
+          aoMap={muscleAoMap}
+          aoMapIntensity={0.6}
+          roughness={0.30}
+          metalness={0.20}
           wireframe={isWireframe}
-          clearcoat={0.28}
-          clearcoatRoughness={0.3}
-          reflectivity={0.5}
+          clearcoat={0.32}
+          clearcoatRoughness={0.25}
+          reflectivity={0.6}
         />
       </mesh>
 
