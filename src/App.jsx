@@ -16,6 +16,7 @@ export default function App() {
   const [isHeatmapMode, setIsHeatmapMode] = useState(true);
   const [isWireframe, setIsWireframe] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
+  const [showLabels, setShowLabels] = useState(true);
   const [cameraPreset, setCameraPreset] = useState('front');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState(null);
@@ -194,6 +195,8 @@ export default function App() {
             onToggleWireframe={() => setIsWireframe(!isWireframe)}
             showSkeleton={showSkeleton}
             onToggleSkeleton={() => setShowSkeleton(!showSkeleton)}
+            showLabels={showLabels}
+            onToggleLabels={() => setShowLabels(!showLabels)}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onSelectMuscle={setSelectedMuscle}
@@ -206,6 +209,7 @@ export default function App() {
               isHeatmapMode={isHeatmapMode}
               isWireframe={isWireframe}
               showSkeleton={showSkeleton}
+              showLabels={showLabels}
               selectedMuscle={selectedMuscle}
               onSelectMuscle={setSelectedMuscle}
               hoveredMuscle={hoveredMuscle}

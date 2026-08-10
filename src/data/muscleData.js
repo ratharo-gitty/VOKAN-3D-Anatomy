@@ -1,13 +1,16 @@
-// Comprehensive Anatomical Muscle Groups Definition for VOKAN 3D Anatomy
+// Comprehensive Anatomical Écorché Muscle Definition for VOKAN 3D Anatomy
 export const MUSCLE_GROUPS = {
   // UPPER BODY - FRONT
   chest_upper: {
     id: 'chest_upper',
-    name: 'Upper Pectoralis (Clavicular)',
+    name: 'Upper Pectoralis',
+    latinName: 'Pectoralis Major (Clavicular)',
     category: 'Chest',
     region: 'Front Upper',
     side: 'Center',
     function: 'Shoulder flexion, horizontal adduction of upper arm',
+    origin: 'Anterior surface of medial half of clavicle',
+    insertion: 'Intertubercular sulcus of humerus',
     position: [0, 1.35, 0.42],
     scale: [0.75, 0.28, 0.35],
     rotation: [0.1, 0, 0],
@@ -17,11 +20,14 @@ export const MUSCLE_GROUPS = {
   },
   chest_lower: {
     id: 'chest_lower',
-    name: 'Lower Pectoralis (Sternal)',
+    name: 'Lower Pectoralis',
+    latinName: 'Pectoralis Major (Sternal)',
     category: 'Chest',
     region: 'Front Upper',
     side: 'Center',
     function: 'Arm adduction, internal rotation, horizontal pressing',
+    origin: 'Anterior sternum & costal cartilages',
+    insertion: 'Greater tubercle crest of humerus',
     position: [0, 1.15, 0.44],
     scale: [0.85, 0.38, 0.38],
     rotation: [0, 0, 0],
@@ -31,7 +37,8 @@ export const MUSCLE_GROUPS = {
   },
   delt_anterior_left: {
     id: 'delt_anterior_left',
-    name: 'Anterior Deltoid (Front Shoulders Left)',
+    name: 'Anterior Deltoid (L)',
+    latinName: 'Deltoideus (Pars Clavicularis L)',
     category: 'Shoulders',
     region: 'Front Upper',
     side: 'Left',
@@ -44,7 +51,8 @@ export const MUSCLE_GROUPS = {
   },
   delt_anterior_right: {
     id: 'delt_anterior_right',
-    name: 'Anterior Deltoid (Front Shoulders Right)',
+    name: 'Anterior Deltoid (R)',
+    latinName: 'Deltoideus (Pars Clavicularis R)',
     category: 'Shoulders',
     region: 'Front Upper',
     side: 'Right',
@@ -57,7 +65,8 @@ export const MUSCLE_GROUPS = {
   },
   delt_lateral_left: {
     id: 'delt_lateral_left',
-    name: 'Lateral Deltoid (Side Shoulder Left)',
+    name: 'Lateral Deltoid (L)',
+    latinName: 'Deltoideus (Pars Acromialis L)',
     category: 'Shoulders',
     region: 'Side Upper',
     side: 'Left',
@@ -70,7 +79,8 @@ export const MUSCLE_GROUPS = {
   },
   delt_lateral_right: {
     id: 'delt_lateral_right',
-    name: 'Lateral Deltoid (Side Shoulder Right)',
+    name: 'Lateral Deltoid (R)',
+    latinName: 'Deltoideus (Pars Acromialis R)',
     category: 'Shoulders',
     region: 'Side Upper',
     side: 'Right',
@@ -83,7 +93,8 @@ export const MUSCLE_GROUPS = {
   },
   biceps_left: {
     id: 'biceps_left',
-    name: 'Biceps Brachii (Left)',
+    name: 'Biceps Brachii (L)',
+    latinName: 'Biceps Brachii (Caput Longum L)',
     category: 'Arms',
     region: 'Front Upper',
     side: 'Left',
@@ -96,7 +107,8 @@ export const MUSCLE_GROUPS = {
   },
   biceps_right: {
     id: 'biceps_right',
-    name: 'Biceps Brachii (Right)',
+    name: 'Biceps Brachii (R)',
+    latinName: 'Biceps Brachii (Caput Longum R)',
     category: 'Arms',
     region: 'Front Upper',
     side: 'Right',
@@ -109,7 +121,8 @@ export const MUSCLE_GROUPS = {
   },
   forearms_left: {
     id: 'forearms_left',
-    name: 'Forearm Flexors & Extensors (Left)',
+    name: 'Forearms (L)',
+    latinName: 'Brachioradialis & Flexors (L)',
     category: 'Arms',
     region: 'Front Lower',
     side: 'Left',
@@ -122,7 +135,8 @@ export const MUSCLE_GROUPS = {
   },
   forearms_right: {
     id: 'forearms_right',
-    name: 'Forearm Flexors & Extensors (Right)',
+    name: 'Forearms (R)',
+    latinName: 'Brachioradialis & Flexors (R)',
     category: 'Arms',
     region: 'Front Lower',
     side: 'Right',
@@ -135,7 +149,8 @@ export const MUSCLE_GROUPS = {
   },
   abs_rectus: {
     id: 'abs_rectus',
-    name: 'Rectus Abdominis (Six-Pack)',
+    name: 'Rectus Abdominis',
+    latinName: 'Rectus Abdominis (Six-Pack)',
     category: 'Core',
     region: 'Front Mid',
     side: 'Center',
@@ -148,7 +163,8 @@ export const MUSCLE_GROUPS = {
   },
   obliques_left: {
     id: 'obliques_left',
-    name: 'External Obliques (Left)',
+    name: 'External Oblique (L)',
+    latinName: 'Obliquus Externus Abdominis L',
     category: 'Core',
     region: 'Front Mid',
     side: 'Left',
@@ -161,7 +177,8 @@ export const MUSCLE_GROUPS = {
   },
   obliques_right: {
     id: 'obliques_right',
-    name: 'External Obliques (Right)',
+    name: 'External Oblique (R)',
+    latinName: 'Obliquus Externus Abdominis R',
     category: 'Core',
     region: 'Front Mid',
     side: 'Right',
@@ -177,6 +194,7 @@ export const MUSCLE_GROUPS = {
   traps_upper: {
     id: 'traps_upper',
     name: 'Upper Trapezius',
+    latinName: 'Trapezius (Pars Descendens)',
     category: 'Back',
     region: 'Back Upper',
     side: 'Center',
@@ -190,6 +208,7 @@ export const MUSCLE_GROUPS = {
   traps_mid_lower: {
     id: 'traps_mid_lower',
     name: 'Mid & Lower Trapezius',
+    latinName: 'Trapezius (Pars Transversa/Ascendens)',
     category: 'Back',
     region: 'Back Upper',
     side: 'Center',
@@ -202,7 +221,8 @@ export const MUSCLE_GROUPS = {
   },
   lats_left: {
     id: 'lats_left',
-    name: 'Latissimus Dorsi (Left Lat)',
+    name: 'Latissimus Dorsi (L)',
+    latinName: 'Latissimus Dorsi L',
     category: 'Back',
     region: 'Back Mid',
     side: 'Left',
@@ -215,7 +235,8 @@ export const MUSCLE_GROUPS = {
   },
   lats_right: {
     id: 'lats_right',
-    name: 'Latissimus Dorsi (Right Lat)',
+    name: 'Latissimus Dorsi (R)',
+    latinName: 'Latissimus Dorsi R',
     category: 'Back',
     region: 'Back Mid',
     side: 'Right',
@@ -228,7 +249,8 @@ export const MUSCLE_GROUPS = {
   },
   erector_spinae: {
     id: 'erector_spinae',
-    name: 'Erector Spinae (Lower Back)',
+    name: 'Erector Spinae',
+    latinName: 'Erector Spinae (Lower Back)',
     category: 'Back',
     region: 'Back Lower',
     side: 'Center',
@@ -241,7 +263,8 @@ export const MUSCLE_GROUPS = {
   },
   triceps_left: {
     id: 'triceps_left',
-    name: 'Triceps Brachii (Left)',
+    name: 'Triceps Brachii (L)',
+    latinName: 'Triceps Brachii (Caput Laterale L)',
     category: 'Arms',
     region: 'Back Upper',
     side: 'Left',
@@ -254,7 +277,8 @@ export const MUSCLE_GROUPS = {
   },
   triceps_right: {
     id: 'triceps_right',
-    name: 'Triceps Brachii (Right)',
+    name: 'Triceps Brachii (R)',
+    latinName: 'Triceps Brachii (Caput Laterale R)',
     category: 'Arms',
     region: 'Back Upper',
     side: 'Right',
@@ -267,7 +291,8 @@ export const MUSCLE_GROUPS = {
   },
   delt_posterior_left: {
     id: 'delt_posterior_left',
-    name: 'Posterior Deltoid (Rear Shoulder Left)',
+    name: 'Posterior Deltoid (L)',
+    latinName: 'Deltoideus (Pars Spinalis L)',
     category: 'Shoulders',
     region: 'Back Upper',
     side: 'Left',
@@ -280,7 +305,8 @@ export const MUSCLE_GROUPS = {
   },
   delt_posterior_right: {
     id: 'delt_posterior_right',
-    name: 'Posterior Deltoid (Rear Shoulder Right)',
+    name: 'Posterior Deltoid (R)',
+    latinName: 'Deltoideus (Pars Spinalis R)',
     category: 'Shoulders',
     region: 'Back Upper',
     side: 'Right',
@@ -295,7 +321,8 @@ export const MUSCLE_GROUPS = {
   // LOWER BODY
   glutes_left: {
     id: 'glutes_left',
-    name: 'Gluteus Maximus (Left)',
+    name: 'Gluteus Maximus (L)',
+    latinName: 'Gluteus Maximus L',
     category: 'Glutes',
     region: 'Back Lower',
     side: 'Left',
@@ -308,7 +335,8 @@ export const MUSCLE_GROUPS = {
   },
   glutes_right: {
     id: 'glutes_right',
-    name: 'Gluteus Maximus (Right)',
+    name: 'Gluteus Maximus (R)',
+    latinName: 'Gluteus Maximus R',
     category: 'Glutes',
     region: 'Back Lower',
     side: 'Right',
@@ -321,7 +349,8 @@ export const MUSCLE_GROUPS = {
   },
   quads_left: {
     id: 'quads_left',
-    name: 'Quadriceps Femoris (Left Thigh)',
+    name: 'Quadriceps Femoris (L)',
+    latinName: 'Quadriceps Femoris L',
     category: 'Legs',
     region: 'Front Lower',
     side: 'Left',
@@ -334,7 +363,8 @@ export const MUSCLE_GROUPS = {
   },
   quads_right: {
     id: 'quads_right',
-    name: 'Quadriceps Femoris (Right Thigh)',
+    name: 'Quadriceps Femoris (R)',
+    latinName: 'Quadriceps Femoris R',
     category: 'Legs',
     region: 'Front Lower',
     side: 'Right',
@@ -347,7 +377,8 @@ export const MUSCLE_GROUPS = {
   },
   hamstrings_left: {
     id: 'hamstrings_left',
-    name: 'Hamstrings (Left Rear Thigh)',
+    name: 'Hamstrings (L)',
+    latinName: 'Biceps Femoris & Semitendinosus L',
     category: 'Legs',
     region: 'Back Lower',
     side: 'Left',
@@ -360,7 +391,8 @@ export const MUSCLE_GROUPS = {
   },
   hamstrings_right: {
     id: 'hamstrings_right',
-    name: 'Hamstrings (Right Rear Thigh)',
+    name: 'Hamstrings (R)',
+    latinName: 'Biceps Femoris & Semitendinosus R',
     category: 'Legs',
     region: 'Back Lower',
     side: 'Right',
@@ -373,7 +405,8 @@ export const MUSCLE_GROUPS = {
   },
   calves_left: {
     id: 'calves_left',
-    name: 'Gastrocnemius & Soleus (Left Calf)',
+    name: 'Gastrocnemius & Soleus (L)',
+    latinName: 'Gastrocnemius & Soleus L',
     category: 'Legs',
     region: 'Front/Back Lower',
     side: 'Left',
@@ -386,7 +419,8 @@ export const MUSCLE_GROUPS = {
   },
   calves_right: {
     id: 'calves_right',
-    name: 'Gastrocnemius & Soleus (Right Calf)',
+    name: 'Gastrocnemius & Soleus (R)',
+    latinName: 'Gastrocnemius & Soleus R',
     category: 'Legs',
     region: 'Front/Back Lower',
     side: 'Right',
@@ -399,18 +433,17 @@ export const MUSCLE_GROUPS = {
   }
 };
 
-// Muscle Intensity Color Ramp Generator
 export const HEATMAP_COLORS = {
-  0: '#3D4148',    // Unworked Gray/Slate
-  1: '#00F2FE',    // Teal / Soft Cyan (Light Activity)
-  2: '#FFD700',    // Bright Yellow (Moderate Activity)
-  3: '#FF5E00',    // Fiery Orange (High Activity)
-  4: '#FF0055',    // Neon Red / Pink (Extreme Hit)
-  5: '#D900FF'     // Hyper Purple Glow (Max Overload)
+  0: '#3D4148',
+  1: '#00F2FE',
+  2: '#FFD700',
+  3: '#FF5E00',
+  4: '#FF0055',
+  5: '#D900FF'
 };
 
 export const getHeatmapColor = (intensity) => {
-  if (intensity <= 0) return MUSCLE_GROUPS.chest_upper ? '#3D4148' : '#2A2E35';
+  if (intensity <= 0) return '#3D4148';
   if (intensity < 1.5) return '#00F2FE';
   if (intensity < 3.0) return '#FFD700';
   if (intensity < 4.5) return '#FF5E00';
@@ -419,10 +452,10 @@ export const getHeatmapColor = (intensity) => {
 };
 
 export const getHeatmapLevel = (intensity) => {
-  if (intensity <= 0) return { label: 'Idle / Rested', color: '#6C727F' };
+  if (intensity <= 0) return { label: 'Rested / Baseline', color: '#6C727F' };
   if (intensity < 1.5) return { label: 'Light Hit', color: '#00F2FE' };
   if (intensity < 3.0) return { label: 'Moderate Work', color: '#FFD700' };
-  if (intensity < 4.5) return { label: 'High Intensity', color: '#FF5E00' };
-  if (intensity < 6.0) return { label: 'Extreme Load', color: '#FF0055' };
+  if (intensity < 4.5) return { label: 'High Load', color: '#FF5E00' };
+  if (intensity < 6.0) return { label: 'Extreme Work', color: '#FF0055' };
   return { label: 'Peak Overload', color: '#D900FF' };
 };
