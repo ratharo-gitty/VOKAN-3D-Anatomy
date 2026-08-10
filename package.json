@@ -1,0 +1,40 @@
+{
+  "name": "vokan-3d-anatomy",
+  "private": false,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "VOKAN 3D Anatomy - Interactive Grayscale 3D Human Muscle Heatmap & Progress Tracker for Fitness Apps",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.121.5",
+    "@react-three/fiber": "^8.17.14",
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.173.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/three": "^0.173.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.1.0"
+  },
+  "keywords": [
+    "fitness",
+    "3d-anatomy",
+    "muscles",
+    "heatmap",
+    "threejs",
+    "react-three-fiber",
+    "workout-tracker"
+  ],
+  "author": "Chanratharo Rath (ratharo-gitty)",
+  "license": "MIT"
+}
