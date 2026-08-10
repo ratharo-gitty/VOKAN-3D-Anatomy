@@ -16,7 +16,7 @@ export default function App() {
   const [isHeatmapMode, setIsHeatmapMode] = useState(true);
   const [isWireframe, setIsWireframe] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [showLabels, setShowLabels] = useState(true);
+  const [showLabels, setShowLabels] = useState(false); // Default to false (clean body view without text badges)
   const [cameraPreset, setCameraPreset] = useState('front');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState(null);
