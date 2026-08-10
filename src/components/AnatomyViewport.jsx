@@ -12,11 +12,11 @@ const CameraController = ({ cameraPreset }) => {
     if (!controlsRef.current) return;
     const c = controlsRef.current;
     const presets = {
-      front:  { pos: [0, 0.5, 5.5],  target: [0, 0.3, 0] },
-      back:   { pos: [0, 0.5, -5.5], target: [0, 0.3, 0] },
-      upper:  { pos: [0, 1.4, 3.5],  target: [0, 1.2, 0] },
-      lower:  { pos: [0, -0.6, 3.5], target: [0, -0.8, 0] },
-      arms:   { pos: [2.5, 1.0, 2.8], target: [1.1, 0.9, 0] },
+      front:  { pos: [0, 0.05, 1.35],  target: [0, 0.02, 0] },
+      back:   { pos: [0, 0.05, -1.35], target: [0, 0.02, 0] },
+      upper:  { pos: [0, 0.22, 0.85],  target: [0, 0.20, 0] },
+      lower:  { pos: [0, -0.22, 0.85], target: [0, -0.22, 0] },
+      arms:   { pos: [0.55, 0.18, 0.65], target: [0.05, 0.18, 0] },
     };
     const p = presets[cameraPreset] || presets.front;
     c.object.position.set(...p.pos);
@@ -29,8 +29,8 @@ const CameraController = ({ cameraPreset }) => {
       ref={controlsRef}
       enablePan
       enableZoom
-      minDistance={2.2}
-      maxDistance={9.5}
+      minDistance={0.4}
+      maxDistance={2.8}
       maxPolarAngle={Math.PI / 1.5}
       minPolarAngle={Math.PI / 8}
     />
@@ -53,12 +53,12 @@ export default function AnatomyViewport({
     <div
       className="relative w-full h-full overflow-hidden rounded-2xl shadow-2xl"
       style={{
-        background: 'radial-gradient(ellipse at 50% 40%, #111827 0%, #080c14 55%, #030508 100%)',
-        border: '1px solid rgba(255,255,255,0.05)',
+        background: 'radial-gradient(ellipse at 50% 40%, #0f172a 0%, #080d1a 55%, #03060d 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
       {/* Grid underlay */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-[0.04] pointer-events-none" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.05] pointer-events-none" />
 
       <Canvas
         shadows
@@ -66,37 +66,37 @@ export default function AnatomyViewport({
           antialias: true,
           alpha: false,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.15,
+          toneMappingExposure: 1.2,
         }}
       >
-        <PerspectiveCamera makeDefault position={[0, 0.5, 5.5]} fov={38} near={0.1} far={80} />
+        <PerspectiveCamera makeDefault position={[0, 0.05, 1.35]} fov={40} near={0.01} far={50} />
         <CameraController cameraPreset={cameraPreset} />
 
         {/* ── Studio Lighting ── */}
-        <ambientLight intensity={0.35} color="#c8d0e0" />
+        <ambientLight intensity={0.45} color="#cbd5e1" />
 
-        {/* Key — warm upper-right */}
+        {/* Key light — warm top-right */}
         <directionalLight
-          position={[4, 7, 5]}
-          intensity={1.6}
+          position={[3, 5, 4]}
+          intensity={1.8}
           castShadow
           shadow-mapSize={2048}
-          color="#ffecd2"
+          color="#fff7ed"
         />
 
-        {/* Fill — cool left */}
-        <directionalLight position={[-5, 4, -3]} intensity={0.5} color="#9ab8e8" />
+        {/* Fill light — cool left */}
+        <directionalLight position={[-4, 3, -2]} intensity={0.6} color="#93c5fd" />
 
-        {/* Rim — backlight for silhouette edge */}
-        <directionalLight position={[0, 3, -6]} intensity={0.7} color="#7090c0" />
+        {/* Rim light — back edge separation */}
+        <directionalLight position={[0, 2, -5]} intensity={0.85} color="#38bdf8" />
 
         {/* Under-light drama */}
-        <spotLight position={[0, -3, 3]} intensity={0.2} angle={0.9} penumbra={1} color="#2a3a55" />
+        <spotLight position={[0, -2, 2]} intensity={0.3} angle={0.9} penumbra={1} color="#1e293b" />
 
         {/* Contact Shadows */}
-        <ContactShadows position={[0, -2.5, 0]} opacity={0.45} scale={8} blur={3} far={5} />
+        <ContactShadows position={[0, -0.52, 0]} opacity={0.55} scale={3} blur={2.5} far={2} />
 
-        {/* ── 3D Écorché Muscle Model ── */}
+        {/* ── Real 3D Male Human Body Model ── */}
         <HumanMuscleModel
           muscleIntensities={muscleIntensities}
           isHeatmapMode={isHeatmapMode}
@@ -108,7 +108,7 @@ export default function AnatomyViewport({
           onHoverMuscle={onHoverMuscle}
         />
 
-        {/* ── 3D Écorché Muscle Name Pins & Labels ── */}
+        {/* ── 3D Muscle Name Pins & Labels ── */}
         <AnatomyLabels
           showLabels={showLabels}
           muscleIntensities={muscleIntensities}
@@ -121,20 +121,20 @@ export default function AnatomyViewport({
         {hoveredMuscle && !selectedMuscle && (
           <Html
             position={[
-              (hoveredMuscle.position?.[0] || 0) + 0.35,
-              (hoveredMuscle.position?.[1] || 0) + 0.25,
-              (hoveredMuscle.position?.[2] || 0) + 0.15,
+              hoveredMuscle.position?.[0] * 0.10 || 0,
+              (hoveredMuscle.position?.[1] * 0.20 || 0) + 0.05,
+              hoveredMuscle.position?.[2] * 0.10 || 0.08
             ]}
             center
-            distanceFactor={5.5}
+            distanceFactor={2.2}
           >
             <div
               style={{
-                padding: '5px 12px',
-                borderRadius: '8px',
-                background: 'rgba(6, 10, 20, 0.92)',
+                padding: '6px 14px',
+                borderRadius: '10px',
+                background: 'rgba(8, 14, 28, 0.94)',
                 backdropFilter: 'blur(14px)',
-                border: '1px solid rgba(0,242,254,0.35)',
+                border: '1px solid rgba(0,242,254,0.4)',
                 color: '#fff',
                 fontSize: '11px',
                 fontWeight: 600,
@@ -143,12 +143,12 @@ export default function AnatomyViewport({
                 pointerEvents: 'none',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '7px',
-                boxShadow: '0 6px 24px rgba(0,0,0,0.5)',
+                gap: '8px',
+                boxShadow: '0 8px 32px rgba(0,242,254,0.2)'
               }}
             >
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#00f2fe', boxShadow: '0 0 6px #00f2fe' }} />
-              {hoveredMuscle.latinName || hoveredMuscle.name}
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00f2fe', boxShadow: '0 0 8px #00f2fe' }} />
+              <span>{hoveredMuscle.latinName || hoveredMuscle.name}</span>
               <span style={{ color: '#64748b', fontFamily: "'JetBrains Mono', monospace", fontSize: 10 }}>
                 {(muscleIntensities[hoveredMuscle.id] || 0).toFixed(1)}pt
               </span>
@@ -158,9 +158,9 @@ export default function AnatomyViewport({
       </Canvas>
 
       {/* Watermark */}
-      <div className="absolute bottom-3 left-3 pointer-events-none opacity-30">
-        <span className="text-[9px] font-mono text-slate-400 tracking-widest uppercase">
-          VOKAN 3D · ÉCORCHÉ ANATOMY
+      <div className="absolute bottom-3 left-3 pointer-events-none opacity-40">
+        <span className="text-[10px] font-mono text-slate-400 tracking-widest uppercase">
+          VOKAN 3D · REAL HUMAN MALE ANATOMY
         </span>
       </div>
     </div>

@@ -11,25 +11,25 @@ export default function AnatomyLabels({
 }) {
   if (!showLabels) return null;
 
-  // Filter main representative muscle pins to avoid clutter
-  const keyLabelIds = [
-    'chest_upper',
-    'delt_anterior_right',
-    'biceps_right',
-    'abs_rectus',
-    'obliques_left',
-    'quads_left',
-    'calves_right',
-    'traps_upper',
-    'lats_left',
-    'triceps_right',
-    'glutes_left',
-    'hamstrings_right'
+  // Calibrated pin coordinates matching the real GLB 3D body space
+  const keyLabels = [
+    { id: 'chest_upper', pos: [0, 0.28, 0.08] },
+    { id: 'delt_anterior_right', pos: [0.05, 0.29, 0.05] },
+    { id: 'biceps_right', pos: [0.06, 0.20, 0.03] },
+    { id: 'abs_rectus', pos: [0, 0.10, 0.07] },
+    { id: 'obliques_left', pos: [-0.04, 0.09, 0.05] },
+    { id: 'quads_left', pos: [-0.03, -0.19, 0.04] },
+    { id: 'calves_right', pos: [0.03, -0.38, -0.01] },
+    { id: 'traps_upper', pos: [0, 0.35, -0.02] },
+    { id: 'lats_left', pos: [-0.04, 0.16, -0.04] },
+    { id: 'triceps_right', pos: [0.06, 0.20, -0.03] },
+    { id: 'glutes_left', pos: [-0.03, -0.04, -0.05] },
+    { id: 'hamstrings_right', pos: [0.03, -0.19, -0.04] }
   ];
 
   return (
     <group>
-      {keyLabelIds.map((id) => {
+      {keyLabels.map(({ id, pos }) => {
         const muscle = MUSCLE_GROUPS[id];
         if (!muscle) return null;
 
@@ -37,19 +37,12 @@ export default function AnatomyLabels({
         const isHovered = hoveredMuscle?.id === muscle.id;
         const intensity = muscleIntensities[muscle.id] || 0;
 
-        // Position label slightly offset from muscle center for leader line alignment
-        const pinPos = [
-          muscle.position[0],
-          muscle.position[1],
-          muscle.position[2]
-        ];
-
         return (
           <Html
             key={muscle.id}
-            position={pinPos}
+            position={pos}
             center
-            distanceFactor={5.2}
+            distanceFactor={2.2}
             zIndexRange={[100, 0]}
           >
             <div
