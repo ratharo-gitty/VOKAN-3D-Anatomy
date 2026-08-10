@@ -1,10 +1,12 @@
 import React from 'react';
-import { Camera, Eye, Flame, Layers, Box, Search, Tag } from 'lucide-react';
+import { Camera, Eye, Flame, Layers, Box, Search, Tag, UserCheck } from 'lucide-react';
 import { MUSCLE_GROUPS } from '../data/muscleData';
 
 export default function SidebarControls({
   cameraPreset,
   onSetCameraPreset,
+  bodyType = 'unisex',
+  onSetBodyType,
   isHeatmapMode,
   onToggleHeatmap,
   isWireframe,
@@ -25,6 +27,12 @@ export default function SidebarControls({
     { id: 'arms', label: 'Biceps & Shoulders' }
   ];
 
+  const bodyTypes = [
+    { id: 'unisex', label: 'Unisex Fit' },
+    { id: 'male', label: 'Male Fit' },
+    { id: 'female', label: 'Female Fit' }
+  ];
+
   const searchResults = Object.values(MUSCLE_GROUPS).filter((m) =>
     m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (m.latinName && m.latinName.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -33,6 +41,31 @@ export default function SidebarControls({
 
   return (
     <div className="w-full lg:w-72 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 flex flex-col gap-5 shadow-xl">
+      {/* Unisex / Male / Female Body Physique Selector */}
+      <div>
+        <div className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold mb-2.5 flex items-center gap-2">
+          <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Anatomy Physique</span>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          {bodyTypes.map((type) => (
+            <button
+              key={type.id}
+              onClick={() => onSetBodyType(type.id)}
+              className={`py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
+                bodyType === type.id
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {type.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-px bg-slate-800" />
+
       {/* 3D Visualizer Display Modes */}
       <div>
         <div className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold mb-2.5 flex items-center gap-2">
@@ -75,7 +108,7 @@ export default function SidebarControls({
             }`}
           >
             <Tag className="w-3.5 h-3.5" />
-            <span>{showLabels ? 'Hide Pins' : '3D Pins'}</span>
+            <span>{showLabels ? 'Pins On' : '3D Pins'}</span>
           </button>
 
           <button

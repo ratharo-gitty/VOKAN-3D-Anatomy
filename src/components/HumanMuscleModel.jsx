@@ -5,11 +5,11 @@ import * as THREE from 'three';
 import { MUSCLE_GROUPS } from '../data/muscleData';
 
 /*
- * VOKAN 3D Anatomy — Real Male Body 3D GLB Model Engine
+ * VOKAN 3D Anatomy — Unisex Fit Athletic Human Body 3D GLB Model Engine
  * 
- * Renders an anatomically-accurate 3D human male body mesh model.
- * A vertex classification engine maps all 28,391 vertices to 28 distinct
- * gym muscle groups. In grayscale baseline, renders a metallic slate écorché;
+ * Renders a fit, athletic unisex/neutral human body mesh model.
+ * Maps all 28,391 vertices to 28 distinct gym muscle groups.
+ * In grayscale baseline, renders a metallic slate écorché;
  * in heatmap mode, dynamic workout load colors light up the corresponding
  * muscle regions on the real body mesh.
  */
@@ -61,7 +61,7 @@ const MUSCLE_REGIONS = {
 };
 
 const HEAT_RAMP = [
-  new THREE.Color('#3A3D42'), // 0 - Resting Metallic Slate
+  new THREE.Color('#3A3D42'), // 0 - Resting Slate
   new THREE.Color('#00F2FE'), // 1 - Neon Cyan
   new THREE.Color('#FFD700'), // 2 - Gold Yellow
   new THREE.Color('#FF5E00'), // 3 - Fiery Orange
@@ -99,6 +99,7 @@ function classifyBodyVertex(x, y, z) {
 }
 
 export default function HumanMuscleModel({
+  bodyType = 'unisex',
   muscleIntensities = {},
   isHeatmapMode = true,
   isWireframe = false,
@@ -110,6 +111,20 @@ export default function HumanMuscleModel({
 }) {
   const meshRef = useRef();
   const { scene } = useGLTF('/models/human_body.glb');
+
+  // Body mesh scale transformation according to physique mode
+  const bodyScale = useMemo(() => {
+    switch (bodyType) {
+      case 'unisex':
+        return [0.98, 0.99, 0.94]; // Balanced unisex athletic fit
+      case 'male':
+        return [1.02, 1.0, 0.98];  // Broad V-taper frame
+      case 'female':
+        return [0.94, 0.98, 0.90]; // Fit female athletic frame
+      default:
+        return [0.98, 0.99, 0.94];
+    }
+  }, [bodyType]);
 
   // Clone real 3D human body geometry
   const bodyGeometry = useMemo(() => {
@@ -177,7 +192,7 @@ export default function HumanMuscleModel({
   useFrame((state) => {
     if (meshRef.current) {
       const t = state.clock.getElapsedTime();
-      meshRef.current.scale.y = 1.0 + Math.sin(t * 1.5) * 0.0015;
+      meshRef.current.scale.y = bodyScale[1] + Math.sin(t * 1.5) * 0.0015;
     }
   });
 
@@ -217,8 +232,8 @@ export default function HumanMuscleModel({
   if (!bodyGeometry) return null;
 
   return (
-    <group position={[0, -0.05, 0]}>
-      {/* Real 3D Human Male Body Mesh */}
+    <group position={[0, -0.05, 0]} scale={bodyScale}>
+      {/* Real 3D Athletic Human Body Mesh */}
       <mesh
         ref={meshRef}
         geometry={bodyGeometry}

@@ -13,10 +13,11 @@ import confetti from 'canvas-confetti';
 export default function App() {
   // State
   const [workoutLogs, setWorkoutLogs] = useState([]);
+  const [bodyType, setBodyType] = useState('unisex'); // Default to Unisex Fit
   const [isHeatmapMode, setIsHeatmapMode] = useState(true);
   const [isWireframe, setIsWireframe] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [showLabels, setShowLabels] = useState(false); // Default to false (clean body view without text badges)
+  const [showLabels, setShowLabels] = useState(false); // Clean body view without muscle text
   const [cameraPreset, setCameraPreset] = useState('front');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState(null);
@@ -189,6 +190,8 @@ export default function App() {
           <SidebarControls
             cameraPreset={cameraPreset}
             onSetCameraPreset={setCameraPreset}
+            bodyType={bodyType}
+            onSetBodyType={setBodyType}
             isHeatmapMode={isHeatmapMode}
             onToggleHeatmap={() => setIsHeatmapMode(!isHeatmapMode)}
             isWireframe={isWireframe}
@@ -205,6 +208,7 @@ export default function App() {
           {/* Center 3D Anatomical Grayscale & Heatmap Canvas */}
           <div className="flex-1 h-[550px] lg:h-[720px]">
             <AnatomyViewport
+              bodyType={bodyType}
               muscleIntensities={muscleIntensities}
               isHeatmapMode={isHeatmapMode}
               isWireframe={isWireframe}

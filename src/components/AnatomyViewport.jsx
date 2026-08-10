@@ -38,11 +38,12 @@ const CameraController = ({ cameraPreset }) => {
 };
 
 export default function AnatomyViewport({
+  bodyType = 'unisex',
   muscleIntensities,
   isHeatmapMode,
   isWireframe,
   showSkeleton,
-  showLabels = true,
+  showLabels = false,
   selectedMuscle,
   onSelectMuscle,
   hoveredMuscle,
@@ -96,8 +97,9 @@ export default function AnatomyViewport({
         {/* Contact Shadows */}
         <ContactShadows position={[0, -0.52, 0]} opacity={0.55} scale={3} blur={2.5} far={2} />
 
-        {/* ── Real 3D Male Human Body Model ── */}
+        {/* ── Real 3D Unisex/Fit Human Body Model ── */}
         <HumanMuscleModel
+          bodyType={bodyType}
           muscleIntensities={muscleIntensities}
           isHeatmapMode={isHeatmapMode}
           isWireframe={isWireframe}
@@ -160,7 +162,7 @@ export default function AnatomyViewport({
       {/* Watermark */}
       <div className="absolute bottom-3 left-3 pointer-events-none opacity-40">
         <span className="text-[10px] font-mono text-slate-400 tracking-widest uppercase">
-          VOKAN 3D · REAL HUMAN MALE ANATOMY
+          VOKAN 3D · UNISEX FIT ATHLETIC ANATOMY
         </span>
       </div>
     </div>
