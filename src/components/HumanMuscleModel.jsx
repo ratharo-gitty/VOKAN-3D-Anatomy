@@ -1,222 +1,247 @@
-import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import React, { useRef, useMemo, useEffect } from 'react';
+import { useFrame, useLoader } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { MUSCLE_GROUPS, getHeatmapColor } from '../data/muscleData';
+import { MUSCLE_GROUPS } from '../data/muscleData';
 
-// Custom Anatomical Geometry Generators for Realistic Muscle Forms
-const createMuscleGeometry = (shape) => {
-  switch (shape) {
-    case 'pectoral_upper':
-      return new THREE.BoxGeometry(1.2, 0.45, 0.45, 16, 16, 16);
-    case 'pectoral_lower':
-      return new THREE.CylinderGeometry(0.55, 0.45, 0.65, 32);
-    case 'deltoid':
-      return new THREE.SphereGeometry(0.5, 24, 24);
-    case 'bicep':
-      return new THREE.CapsuleGeometry(0.32, 0.65, 16, 24);
-    case 'tricep':
-      return new THREE.CapsuleGeometry(0.35, 0.7, 16, 24);
-    case 'forearm':
-      return new THREE.CylinderGeometry(0.35, 0.2, 0.8, 24);
-    case 'abs':
-      return new THREE.BoxGeometry(0.85, 1.1, 0.25, 8, 16, 4);
-    case 'oblique':
-      return new THREE.CylinderGeometry(0.3, 0.4, 0.9, 16);
-    case 'traps':
-      return new THREE.ConeGeometry(0.85, 0.6, 16);
-    case 'traps_mid':
-      return new THREE.OctahedronGeometry(0.65, 2);
-    case 'lat':
-      return new THREE.CylinderGeometry(0.6, 0.2, 1.2, 24);
-    case 'erector':
-      return new THREE.BoxGeometry(0.4, 1.2, 0.3, 8, 16, 4);
-    case 'glute':
-      return new THREE.SphereGeometry(0.55, 24, 24);
-    case 'quad':
-      return new THREE.CapsuleGeometry(0.42, 1.1, 16, 24);
-    case 'hamstring':
-      return new THREE.CapsuleGeometry(0.38, 1.0, 16, 24);
-    case 'calf':
-      return new THREE.CapsuleGeometry(0.32, 0.8, 16, 24);
-    default:
-      return new THREE.SphereGeometry(0.4, 16, 16);
-  }
+/*
+ * VOKAN 3D Anatomy - Real Body GLB Model with Positional Muscle Heatmap Shader
+ * 
+ * Uses a real human body GLB mesh as the base silhouette.
+ * A custom vertex shader maps each vertex position to the nearest
+ * anatomical muscle region and colors it with the heatmap intensity.
+ */
+
+// Anatomical region definitions: bounding-box-like zones in model space
+// Each region defines a center point and radii for ellipsoidal matching
+const MUSCLE_REGIONS = {
+  // CHEST
+  chest_upper:     { center: [0, 0.38, 0.08], radii: [0.14, 0.06, 0.06], priority: 10 },
+  chest_lower:     { center: [0, 0.30, 0.09], radii: [0.16, 0.07, 0.06], priority: 9 },
+
+  // SHOULDERS
+  delt_anterior_left:  { center: [-0.19, 0.40, 0.06], radii: [0.05, 0.06, 0.06], priority: 11 },
+  delt_anterior_right: { center: [ 0.19, 0.40, 0.06], radii: [0.05, 0.06, 0.06], priority: 11 },
+  delt_lateral_left:   { center: [-0.22, 0.42, 0.0],  radii: [0.05, 0.06, 0.06], priority: 12 },
+  delt_lateral_right:  { center: [ 0.22, 0.42, 0.0],  radii: [0.05, 0.06, 0.06], priority: 12 },
+  delt_posterior_left:  { center: [-0.19, 0.40, -0.06], radii: [0.05, 0.06, 0.06], priority: 11 },
+  delt_posterior_right: { center: [ 0.19, 0.40, -0.06], radii: [0.05, 0.06, 0.06], priority: 11 },
+
+  // ARMS
+  biceps_left:     { center: [-0.26, 0.28, 0.03],  radii: [0.04, 0.08, 0.04], priority: 13 },
+  biceps_right:    { center: [ 0.26, 0.28, 0.03],  radii: [0.04, 0.08, 0.04], priority: 13 },
+  triceps_left:    { center: [-0.26, 0.28, -0.03], radii: [0.04, 0.08, 0.04], priority: 13 },
+  triceps_right:   { center: [ 0.26, 0.28, -0.03], radii: [0.04, 0.08, 0.04], priority: 13 },
+  forearms_left:   { center: [-0.32, 0.14, 0.0],   radii: [0.035, 0.09, 0.035], priority: 14 },
+  forearms_right:  { center: [ 0.32, 0.14, 0.0],   radii: [0.035, 0.09, 0.035], priority: 14 },
+
+  // BACK
+  traps_upper:     { center: [0, 0.48, -0.04],  radii: [0.14, 0.05, 0.05], priority: 8 },
+  traps_mid_lower: { center: [0, 0.35, -0.07],  radii: [0.12, 0.08, 0.05], priority: 7 },
+  lats_left:       { center: [-0.12, 0.24, -0.06], radii: [0.08, 0.12, 0.05], priority: 6 },
+  lats_right:      { center: [ 0.12, 0.24, -0.06], radii: [0.08, 0.12, 0.05], priority: 6 },
+  erector_spinae:  { center: [0, 0.12, -0.07],  radii: [0.06, 0.12, 0.04], priority: 5 },
+
+  // CORE
+  abs_rectus:      { center: [0, 0.16, 0.08],   radii: [0.08, 0.12, 0.04], priority: 9 },
+  obliques_left:   { center: [-0.10, 0.16, 0.06], radii: [0.05, 0.10, 0.05], priority: 8 },
+  obliques_right:  { center: [ 0.10, 0.16, 0.06], radii: [0.05, 0.10, 0.05], priority: 8 },
+
+  // GLUTES
+  glutes_left:     { center: [-0.08, -0.04, -0.06], radii: [0.07, 0.07, 0.06], priority: 7 },
+  glutes_right:    { center: [ 0.08, -0.04, -0.06], radii: [0.07, 0.07, 0.06], priority: 7 },
+
+  // LEGS
+  quads_left:      { center: [-0.08, -0.22, 0.03], radii: [0.06, 0.14, 0.06], priority: 6 },
+  quads_right:     { center: [ 0.08, -0.22, 0.03], radii: [0.06, 0.14, 0.06], priority: 6 },
+  hamstrings_left: { center: [-0.08, -0.22, -0.04], radii: [0.06, 0.14, 0.05], priority: 5 },
+  hamstrings_right:{ center: [ 0.08, -0.22, -0.04], radii: [0.06, 0.14, 0.05], priority: 5 },
+  calves_left:     { center: [-0.07, -0.48, -0.01], radii: [0.045, 0.10, 0.045], priority: 4 },
+  calves_right:    { center: [ 0.07, -0.48, -0.01], radii: [0.045, 0.10, 0.045], priority: 4 },
 };
 
-// Single Muscle Component
-const IndividualMuscle = ({
-  muscle,
-  intensity = 0,
+// Heatmap color palette
+const HEAT_COLORS = [
+  new THREE.Color('#3D4148'), // 0 - idle gray
+  new THREE.Color('#00F2FE'), // 1 - cyan
+  new THREE.Color('#FFD700'), // 2 - gold
+  new THREE.Color('#FF5E00'), // 3 - orange
+  new THREE.Color('#FF0055'), // 4 - red
+  new THREE.Color('#D900FF'), // 5 - magenta
+];
+
+function getHeatColor(intensity) {
+  if (intensity <= 0) return HEAT_COLORS[0];
+  const idx = Math.min(Math.floor(intensity), HEAT_COLORS.length - 2);
+  const t = intensity - idx;
+  const c = new THREE.Color();
+  c.lerpColors(HEAT_COLORS[idx], HEAT_COLORS[idx + 1], t);
+  return c;
+}
+
+// Determine which muscle region a 3D point belongs to
+function classifyVertex(x, y, z) {
+  let bestId = null;
+  let bestDist = Infinity;
+  let bestPriority = -1;
+
+  for (const [id, region] of Object.entries(MUSCLE_REGIONS)) {
+    const dx = (x - region.center[0]) / region.radii[0];
+    const dy = (y - region.center[1]) / region.radii[1];
+    const dz = (z - region.center[2]) / region.radii[2];
+    const dist = dx * dx + dy * dy + dz * dz;
+
+    if (dist < 1.0) { // Inside ellipsoid
+      if (region.priority > bestPriority || (region.priority === bestPriority && dist < bestDist)) {
+        bestId = id;
+        bestDist = dist;
+        bestPriority = region.priority;
+      }
+    }
+  }
+  return { id: bestId, dist: bestDist };
+}
+
+// The Real Body Model Component
+function RealBodyModel({
+  muscleIntensities = {},
   isHeatmapMode = true,
   isWireframe = false,
-  isSelected = false,
-  isHovered = false,
-  onSelect,
-  onHover,
-  onUnhover
-}) => {
+  selectedMuscle = null,
+  hoveredMuscle = null,
+  onSelectMuscle,
+  onHoverMuscle
+}) {
   const meshRef = useRef();
+  const { scene } = useGLTF('/models/human_body.glb');
 
-  // Create geometry once per shape
-  const geometry = useMemo(() => createMuscleGeometry(muscle.shape), [muscle.shape]);
+  // Clone & extract the body mesh
+  const bodyGeometry = useMemo(() => {
+    let geo = null;
+    scene.traverse((child) => {
+      if (child.isMesh && !geo) {
+        geo = child.geometry.clone();
+      }
+    });
+    return geo;
+  }, [scene]);
 
-  // Compute Color & Glow based on mode & intensity
-  const { baseColor, emissiveColor, emissiveIntensity } = useMemo(() => {
-    if (isSelected) {
-      return {
-        baseColor: '#00F2FE',
-        emissiveColor: '#00F2FE',
-        emissiveIntensity: 0.8
-      };
+  // Store per-vertex muscle region classification
+  const vertexMuscleMap = useMemo(() => {
+    if (!bodyGeometry) return [];
+    const pos = bodyGeometry.attributes.position;
+    const map = new Array(pos.count);
+    for (let i = 0; i < pos.count; i++) {
+      map[i] = classifyVertex(pos.getX(i), pos.getY(i), pos.getZ(i));
+    }
+    return map;
+  }, [bodyGeometry]);
+
+  // Build & update per-vertex color attribute based on intensities
+  useEffect(() => {
+    if (!bodyGeometry || vertexMuscleMap.length === 0) return;
+
+    const pos = bodyGeometry.attributes.position;
+    const colors = new Float32Array(pos.count * 3);
+    const baseGray = new THREE.Color('#3D4148');
+
+    for (let i = 0; i < pos.count; i++) {
+      const { id, dist } = vertexMuscleMap[i];
+      let color;
+
+      if (!isHeatmapMode || !id) {
+        color = baseGray;
+      } else {
+        const intensity = muscleIntensities[id] || 0;
+
+        if (selectedMuscle && id === selectedMuscle.id) {
+          color = new THREE.Color('#00F2FE');
+        } else if (hoveredMuscle && id === hoveredMuscle.id) {
+          color = new THREE.Color('#FFD700');
+        } else if (intensity > 0) {
+          color = getHeatColor(intensity);
+          // Feather edges: blend toward gray at the ellipsoid boundary
+          const feather = Math.max(0, 1 - dist);
+          color = baseGray.clone().lerp(color, feather);
+        } else {
+          color = baseGray;
+        }
+      }
+
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
     }
 
-    if (isHovered) {
-      return {
-        baseColor: '#FFD700',
-        emissiveColor: '#FFD700',
-        emissiveIntensity: 0.6
-      };
-    }
+    bodyGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    bodyGeometry.attributes.color.needsUpdate = true;
+  }, [bodyGeometry, muscleIntensities, isHeatmapMode, selectedMuscle, hoveredMuscle, vertexMuscleMap]);
 
-    if (!isHeatmapMode || intensity === 0) {
-      // Sleek Monochromatic Grayscale baseline
-      return {
-        baseColor: '#424750',
-        emissiveColor: '#000000',
-        emissiveIntensity: 0
-      };
-    }
-
-    // Heatmap dynamic color
-    const hexColor = getHeatmapColor(intensity);
-    return {
-      baseColor: hexColor,
-      emissiveColor: hexColor,
-      emissiveIntensity: Math.min(0.15 + intensity * 0.12, 0.75)
-    };
-  }, [intensity, isHeatmapMode, isSelected, isHovered]);
-
-  // Subtle breathing/pulse animation if selected or peak intensity
+  // Subtle idle rotation animation
   useFrame((state) => {
-    if (meshRef.current && (isSelected || intensity > 4)) {
+    if (meshRef.current) {
+      // Very subtle breathing motion
       const t = state.clock.getElapsedTime();
-      const pulse = 1 + Math.sin(t * 4) * 0.03;
-      meshRef.current.scale.set(
-        muscle.scale[0] * pulse,
-        muscle.scale[1] * pulse,
-        muscle.scale[2] * pulse
-      );
+      meshRef.current.scale.y = 1.0 + Math.sin(t * 1.2) * 0.002;
     }
   });
+
+  // Raycasting click handler -> identify which muscle was clicked
+  const handleClick = (e) => {
+    e.stopPropagation();
+    const point = e.point;
+    // Transform to local space
+    const local = meshRef.current.worldToLocal(point.clone());
+    const { id } = classifyVertex(local.x, local.y, local.z);
+    if (id && MUSCLE_GROUPS[id]) {
+      onSelectMuscle(MUSCLE_GROUPS[id]);
+    }
+  };
+
+  const handlePointerOver = (e) => {
+    e.stopPropagation();
+    const point = e.point;
+    const local = meshRef.current.worldToLocal(point.clone());
+    const { id } = classifyVertex(local.x, local.y, local.z);
+    if (id && MUSCLE_GROUPS[id]) {
+      onHoverMuscle(MUSCLE_GROUPS[id]);
+      document.body.style.cursor = 'pointer';
+    } else {
+      onHoverMuscle(null);
+      document.body.style.cursor = 'default';
+    }
+  };
+
+  const handlePointerOut = (e) => {
+    e.stopPropagation();
+    onHoverMuscle(null);
+    document.body.style.cursor = 'default';
+  };
+
+  if (!bodyGeometry) return null;
 
   return (
     <mesh
       ref={meshRef}
-      position={muscle.position}
-      rotation={muscle.rotation}
-      scale={muscle.scale}
-      geometry={geometry}
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect(muscle);
-      }}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        onHover(muscle);
-      }}
-      onPointerOut={(e) => {
-        e.stopPropagation();
-        onUnhover();
-      }}
+      geometry={bodyGeometry}
+      onClick={handleClick}
+      onPointerMove={handlePointerOver}
+      onPointerOut={handlePointerOut}
+      castShadow
+      receiveShadow
     >
       <meshStandardMaterial
-        color={baseColor}
-        emissive={emissiveColor}
-        emissiveIntensity={emissiveIntensity}
-        roughness={isHeatmapMode && intensity > 0 ? 0.25 : 0.4}
-        metalness={0.2}
+        vertexColors
+        roughness={0.35}
+        metalness={0.15}
         wireframe={isWireframe}
-        transparent={true}
-        opacity={0.92}
+        envMapIntensity={0.6}
       />
     </mesh>
   );
-};
-
-// Skeleton & Body Core Alignment Lines
-const HumanSkeletonRig = () => {
-  return (
-    <group position={[0, 0, 0]}>
-      {/* Spine column */}
-      <mesh position={[0, 0.8, -0.05]}>
-        <cylinderGeometry args={[0.08, 0.1, 2.8, 16]} />
-        <meshStandardMaterial color="#1F232B" roughness={0.8} metalness={0.5} />
-      </mesh>
-      {/* Pelvis region */}
-      <mesh position={[0, -0.2, -0.05]}>
-        <cylinderGeometry args={[0.45, 0.35, 0.4, 16]} />
-        <meshStandardMaterial color="#262A33" roughness={0.7} metalness={0.4} />
-      </mesh>
-      {/* Ribcage frame */}
-      <mesh position={[0, 1.0, 0]}>
-        <sphereGeometry args={[0.62, 16, 16]} />
-        <meshStandardMaterial color="#1D2027" transparent opacity={0.3} wireframe />
-      </mesh>
-      {/* Head placeholder */}
-      <mesh position={[0, 2.2, 0]}>
-        <sphereGeometry args={[0.38, 24, 24]} />
-        <meshStandardMaterial color="#353A45" roughness={0.5} metalness={0.3} />
-      </mesh>
-      {/* Neck */}
-      <mesh position={[0, 1.75, 0]}>
-        <cylinderGeometry args={[0.18, 0.22, 0.35, 16]} />
-        <meshStandardMaterial color="#2D323E" roughness={0.6} />
-      </mesh>
-    </group>
-  );
-};
-
-// Complete Human Anatomical Model
-export default function HumanMuscleModel({
-  muscleIntensities = {},
-  isHeatmapMode = true,
-  isWireframe = false,
-  showSkeleton = true,
-  selectedMuscle = null,
-  onSelectMuscle,
-  hoveredMuscle = null,
-  onHoverMuscle
-}) {
-  const handleUnhover = () => {
-    if (onHoverMuscle) onHoverMuscle(null);
-  };
-
-  return (
-    <group position={[0, 0, 0]}>
-      {/* Internal structural skeleton */}
-      {showSkeleton && <HumanSkeletonRig />}
-
-      {/* Render all anatomical muscle groups */}
-      {Object.values(MUSCLE_GROUPS).map((muscle) => {
-        const intensity = muscleIntensities[muscle.id] || 0;
-        const isSelected = selectedMuscle?.id === muscle.id;
-        const isHovered = hoveredMuscle?.id === muscle.id;
-
-        return (
-          <IndividualMuscle
-            key={muscle.id}
-            muscle={muscle}
-            intensity={intensity}
-            isHeatmapMode={isHeatmapMode}
-            isWireframe={isWireframe}
-            isSelected={isSelected}
-            isHovered={isHovered}
-            onSelect={onSelectMuscle}
-            onHover={onHoverMuscle}
-            onUnhover={handleUnhover}
-          />
-        );
-      })}
-    </group>
-  );
 }
+
+// Preload the GLB
+useGLTF.preload('/models/human_body.glb');
+
+export default RealBodyModel;
