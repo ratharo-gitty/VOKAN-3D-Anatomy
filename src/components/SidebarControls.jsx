@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Eye, Flame, Layers, Box, Search, Tag, UserCheck } from 'lucide-react';
+import { Camera, Eye, Flame, Layers, Box, Search, Tag, UserCheck, Palette } from 'lucide-react';
 import { MUSCLE_GROUPS } from '../data/muscleData';
 
 export default function SidebarControls({
@@ -7,6 +7,8 @@ export default function SidebarControls({
   onSetCameraPreset,
   bodyType = 'unisex',
   onSetBodyType,
+  colorTheme = 'reference',
+  onSetColorTheme,
   isHeatmapMode,
   onToggleHeatmap,
   isWireframe,
@@ -33,6 +35,11 @@ export default function SidebarControls({
     { id: 'female', label: 'Female Fit' }
   ];
 
+  const themes = [
+    { id: 'reference', label: 'Reference Écorché' },
+    { id: 'grayscale', label: 'Studio Grayscale' }
+  ];
+
   const searchResults = Object.values(MUSCLE_GROUPS).filter((m) =>
     m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (m.latinName && m.latinName.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -41,6 +48,31 @@ export default function SidebarControls({
 
   return (
     <div className="w-full lg:w-72 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 flex flex-col gap-5 shadow-xl">
+      {/* Anatomical Color Theme Selector */}
+      <div>
+        <div className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold mb-2.5 flex items-center gap-2">
+          <Palette className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Color Theme</span>
+        </div>
+        <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          {themes.map((theme) => (
+            <button
+              key={theme.id}
+              onClick={() => onSetColorTheme(theme.id)}
+              className={`py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
+                colorTheme === theme.id
+                  ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {theme.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-px bg-slate-800" />
+
       {/* Unisex / Male / Female Body Physique Selector */}
       <div>
         <div className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold mb-2.5 flex items-center gap-2">

@@ -39,6 +39,7 @@ const CameraController = ({ cameraPreset }) => {
 
 export default function AnatomyViewport({
   bodyType = 'unisex',
+  colorTheme = 'reference',
   muscleIntensities,
   isHeatmapMode,
   isWireframe,
@@ -54,7 +55,9 @@ export default function AnatomyViewport({
     <div
       className="relative w-full h-full overflow-hidden rounded-2xl shadow-2xl"
       style={{
-        background: 'radial-gradient(ellipse at 50% 40%, #0f172a 0%, #080d1a 55%, #03060d 100%)',
+        background: colorTheme === 'reference' 
+          ? 'radial-gradient(ellipse at 50% 40%, #1e1b18 0%, #0e0c0a 55%, #050403 100%)' 
+          : 'radial-gradient(ellipse at 50% 40%, #0f172a 0%, #080d1a 55%, #03060d 100%)',
         border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
@@ -67,39 +70,40 @@ export default function AnatomyViewport({
           antialias: true,
           alpha: false,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.2,
+          toneMappingExposure: 1.25,
         }}
       >
         <PerspectiveCamera makeDefault position={[0, 0.05, 1.35]} fov={40} near={0.01} far={50} />
         <CameraController cameraPreset={cameraPreset} />
 
         {/* ── Studio Lighting ── */}
-        <ambientLight intensity={0.45} color="#cbd5e1" />
+        <ambientLight intensity={0.5} color="#fff8f0" />
 
         {/* Key light — warm top-right */}
         <directionalLight
           position={[3, 5, 4]}
-          intensity={1.8}
+          intensity={1.85}
           castShadow
           shadow-mapSize={2048}
           color="#fff7ed"
         />
 
-        {/* Fill light — cool left */}
-        <directionalLight position={[-4, 3, -2]} intensity={0.6} color="#93c5fd" />
+        {/* Fill light — soft left */}
+        <directionalLight position={[-4, 3, -2]} intensity={0.65} color="#fed7aa" />
 
         {/* Rim light — back edge separation */}
-        <directionalLight position={[0, 2, -5]} intensity={0.85} color="#38bdf8" />
+        <directionalLight position={[0, 2, -5]} intensity={0.9} color="#f87171" />
 
         {/* Under-light drama */}
-        <spotLight position={[0, -2, 2]} intensity={0.3} angle={0.9} penumbra={1} color="#1e293b" />
+        <spotLight position={[0, -2, 2]} intensity={0.35} angle={0.9} penumbra={1} color="#451a03" />
 
         {/* Contact Shadows */}
         <ContactShadows position={[0, -0.52, 0]} opacity={0.55} scale={3} blur={2.5} far={2} />
 
-        {/* ── Real 3D Unisex/Fit Human Body Model ── */}
+        {/* ── Real 3D Anatomical Écorché Human Body Model ── */}
         <HumanMuscleModel
           bodyType={bodyType}
+          colorTheme={colorTheme}
           muscleIntensities={muscleIntensities}
           isHeatmapMode={isHeatmapMode}
           isWireframe={isWireframe}
@@ -134,9 +138,9 @@ export default function AnatomyViewport({
               style={{
                 padding: '6px 14px',
                 borderRadius: '10px',
-                background: 'rgba(8, 14, 28, 0.94)',
+                background: 'rgba(15, 10, 8, 0.94)',
                 backdropFilter: 'blur(14px)',
-                border: '1px solid rgba(0,242,254,0.4)',
+                border: '1px solid rgba(248, 113, 113, 0.4)',
                 color: '#fff',
                 fontSize: '11px',
                 fontWeight: 600,
@@ -146,12 +150,12 @@ export default function AnatomyViewport({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 8px 32px rgba(0,242,254,0.2)'
+                boxShadow: '0 8px 32px rgba(248, 113, 113, 0.25)'
               }}
             >
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00f2fe', boxShadow: '0 0 8px #00f2fe' }} />
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 8px #ef4444' }} />
               <span>{hoveredMuscle.latinName || hoveredMuscle.name}</span>
-              <span style={{ color: '#64748b', fontFamily: "'JetBrains Mono', monospace", fontSize: 10 }}>
+              <span style={{ color: '#9ca3af', fontFamily: "'JetBrains Mono', monospace", fontSize: 10 }}>
                 {(muscleIntensities[hoveredMuscle.id] || 0).toFixed(1)}pt
               </span>
             </div>
@@ -162,7 +166,7 @@ export default function AnatomyViewport({
       {/* Watermark */}
       <div className="absolute bottom-3 left-3 pointer-events-none opacity-40">
         <span className="text-[10px] font-mono text-slate-400 tracking-widest uppercase">
-          VOKAN 3D · UNISEX FIT ATHLETIC ANATOMY
+          VOKAN 3D · REFERENCE ÉCORCHÉ ANATOMY
         </span>
       </div>
     </div>

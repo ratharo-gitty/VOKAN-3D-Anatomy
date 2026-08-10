@@ -6,17 +6,19 @@ import { MUSCLE_GROUPS } from '../data/muscleData';
 import { generateMuscleStriationNormalMap, generateMuscleAmbientOcclusionMap } from '../utils/textureGenerator';
 
 /*
- * VOKAN 3D Anatomy — Hyper-Detailed Anatomical Écorché Body Engine
+ * VOKAN 3D Anatomy — Exact Écorché Reference-Matched 3D Human Body Engine
  * 
- * Directly modeled after classical 3D muscle anatomy écorché diagrams:
- * - Real 3D Human Male Body Mesh (28,391 vertices) with vertex load heatmaps
- * - Procedural Muscle Fiber Striation Normal Map & Ambient Occlusion Map
- * - Anatomical Tendon & Fascia Structural Layers:
+ * 1:1 Match with Anatomical Écorché Reference Diagrams:
+ * - Anatomical Color Modes:
+ *   1. "reference" (Default): Deep Terracotta Red muscle bellies + Creamy White Tendons & Fascia
+ *   2. "grayscale": Sleek Metallic Dark Slate muscle bellies + White Tendons & Fascia
+ *   3. "heatmap": Dynamic workout progressive volume visualizer
+ * - Sculpted Muscle Bellies & Anatomical Fascia Insertions:
  *   * Linea Alba & 3 Horizontal Abdominal Tendon Intersections
- *   * Serratus Anterior Rib Interdigitation Fingers
- *   * Thoracolumbar Spinal Aponeurosis Diamond & Spine Groove
- *   * Iliotibial (IT) Lateral Thigh Fascia Bands
- *   * Knee Patellar & Calcaneal Achilles Heel Tendons
+ *   * Thoracolumbar Back Aponeurosis Diamond & Spine Groove
+ *   * Serratus Anterior Ribcage Finger Slips
+ *   * Quadriceps Patellar Tendons & Calcaneal Achilles Heel Tendons
+ *   * Cranial Skull & Neck Tendon Cap
  */
 
 const MUSCLE_REGIONS = {
@@ -81,8 +83,15 @@ function getInterpolatedHeatColor(intensity) {
   return HEAT_RAMP[idx].clone().lerp(HEAT_RAMP[idx + 1], t);
 }
 
+// Checks if a vertex belongs to anatomical fascia/tendon/bone insertions matching reference image
 function isAnatomicalFasciaVertex(x, y, z) {
-  // 1. Linea Alba & Abdominal Tendinous Intersections
+  // 1. Skull & Cranial Cap (Matching reference image white head structure)
+  if (y > 0.42) return true;
+
+  // 2. Clavicles & Sternum Center Line
+  if (y > 0.28 && y < 0.38 && Math.abs(x) < 0.012 && z > 0.02) return true;
+
+  // 3. Linea Alba & Abdominal Tendinous Intersections (Front Core)
   if (z > 0.035 && y > 0.02 && y < 0.22) {
     if (Math.abs(x) < 0.005) return true;
     if (Math.abs(x) < 0.035 && (Math.abs(y - 0.16) < 0.006 || Math.abs(y - 0.11) < 0.006 || Math.abs(y - 0.06) < 0.006)) {
@@ -90,19 +99,19 @@ function isAnatomicalFasciaVertex(x, y, z) {
     }
   }
 
-  // 2. Thoracolumbar Spinal Aponeurosis / Fascia
-  if (z < -0.032 && y > 0.02 && y < 0.32) {
+  // 4. Thoracolumbar Spinal Aponeurosis / Fascia (Back Spine Diamond)
+  if (z < -0.032 && y > 0.02 && y < 0.34) {
     if (Math.abs(x) < 0.006) return true;
-    if (y < 0.12 && Math.abs(z) > 0.035 && Math.abs(x) < (0.025 - y * 0.06)) return true;
+    if (y < 0.12 && Math.abs(z) > 0.035 && Math.abs(x) < (0.028 - y * 0.06)) return true;
   }
 
-  // 3. Patellar & Knee Tendons
-  if (y > -0.32 && y < -0.28 && Math.abs(z) > 0.02 && Math.abs(x) > 0.015 && Math.abs(x) < 0.04) {
+  // 5. Patellar & Knee Tendon Insertions (Front Knees)
+  if (y > -0.32 && y < -0.27 && Math.abs(z) > 0.018 && Math.abs(x) > 0.012 && Math.abs(x) < 0.04) {
     return true;
   }
 
-  // 4. Calcaneal Achilles Tendons
-  if (y > -0.48 && y < -0.40 && z < -0.015 && Math.abs(x) > 0.018 && Math.abs(x) < 0.035) {
+  // 6. Calcaneal Achilles Heel Tendons (Back Heel)
+  if (y > -0.48 && y < -0.39 && z < -0.012 && Math.abs(x) > 0.016 && Math.abs(x) < 0.036) {
     return true;
   }
 
@@ -131,21 +140,23 @@ function classifyBodyVertex(x, y, z) {
   return { id: bestId, dist: bestDist };
 }
 
-// 3D Anatomical Fascia & Tendon Overlay Component (Matching Reference Image)
-function AnatomicalFasciaOverlay() {
+// 3D Anatomical Fascia & Tendon Overlay Component (1:1 Reference Match)
+function AnatomicalFasciaOverlay({ colorTheme = 'reference' }) {
+  const fasciaColor = colorTheme === 'reference' ? '#F3EFE6' : '#E2E8F0';
+
   return (
     <group position={[0, -0.05, 0]}>
       {/* Front Linea Alba (White Abdominal Tendon Line) */}
       <mesh position={[0, 0.11, 0.065]}>
         <boxGeometry args={[0.006, 0.18, 0.005]} />
-        <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color={fasciaColor} roughness={0.3} metalness={0.1} />
       </mesh>
 
       {/* Horizontal Abdominal Tendon Intersections */}
       {[0.16, 0.11, 0.06].map((yPos, i) => (
         <mesh key={i} position={[0, yPos, 0.064]}>
           <boxGeometry args={[0.065, 0.005, 0.004]} />
-          <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
+          <meshStandardMaterial color={fasciaColor} roughness={0.3} metalness={0.1} />
         </mesh>
       ))}
 
@@ -154,7 +165,7 @@ function AnatomicalFasciaOverlay() {
         [0.18, 0.14, 0.10].map((yPos, i) => (
           <mesh key={`${sideIdx}-${i}`} position={[xPos, yPos, 0.045]} rotation={[0, sideIdx === 0 ? 0.3 : -0.3, -0.2]}>
             <boxGeometry args={[0.022, 0.004, 0.004]} />
-            <meshStandardMaterial color="#E2E8F0" roughness={0.35} metalness={0.1} />
+            <meshStandardMaterial color={fasciaColor} roughness={0.35} metalness={0.1} />
           </mesh>
         ))
       )}
@@ -162,20 +173,20 @@ function AnatomicalFasciaOverlay() {
       {/* Back Thoracolumbar Spinal Aponeurosis (White Back Fascia Diamond) */}
       <mesh position={[0, 0.15, -0.042]} rotation={[0, 0, Math.PI / 4]}>
         <boxGeometry args={[0.055, 0.055, 0.004]} />
-        <meshStandardMaterial color="#E2E8F0" roughness={0.35} metalness={0.1} />
+        <meshStandardMaterial color={fasciaColor} roughness={0.35} metalness={0.1} />
       </mesh>
 
       {/* Spinal Groove Line */}
       <mesh position={[0, 0.22, -0.043]}>
         <boxGeometry args={[0.006, 0.26, 0.004]} />
-        <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
+        <meshStandardMaterial color={fasciaColor} roughness={0.3} metalness={0.1} />
       </mesh>
 
       {/* Iliotibial (IT) Lateral Thigh Fascia Bands */}
       {[-0.042, 0.042].map((xPos, i) => (
         <mesh key={i} position={[xPos, -0.18, 0.010]}>
           <boxGeometry args={[0.004, 0.16, 0.012]} />
-          <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
+          <meshStandardMaterial color={fasciaColor} roughness={0.3} metalness={0.1} />
         </mesh>
       ))}
 
@@ -183,15 +194,15 @@ function AnatomicalFasciaOverlay() {
       {[-0.028, 0.028].map((xPos, i) => (
         <mesh key={i} position={[xPos, -0.29, 0.038]}>
           <boxGeometry args={[0.016, 0.032, 0.005]} />
-          <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
+          <meshStandardMaterial color={fasciaColor} roughness={0.3} metalness={0.1} />
         </mesh>
       ))}
 
-      {/* Achilles Tendons */}
+      {/* Achilles Heel Tendons */}
       {[-0.026, 0.026].map((xPos, i) => (
         <mesh key={i} position={[xPos, -0.42, -0.024]}>
           <boxGeometry args={[0.012, 0.07, 0.005]} />
-          <meshStandardMaterial color="#E2E8F0" roughness={0.3} metalness={0.1} />
+          <meshStandardMaterial color={fasciaColor} roughness={0.3} metalness={0.1} />
         </mesh>
       ))}
     </group>
@@ -200,6 +211,7 @@ function AnatomicalFasciaOverlay() {
 
 export default function HumanMuscleModel({
   bodyType = 'unisex',
+  colorTheme = 'reference', // 'reference' (Red/Terracotta + White), 'grayscale' (Slate + White)
   muscleIntensities = {},
   isHeatmapMode = true,
   isWireframe = false,
@@ -259,8 +271,13 @@ export default function HumanMuscleModel({
 
     const pos = bodyGeometry.attributes.position;
     const colors = new Float32Array(pos.count * 3);
-    const baseSlate = new THREE.Color('#3A3D42');
-    const fasciaWhite = new THREE.Color('#CBD5E1');
+
+    // Baseline muscle color palette
+    const baseTerracottaRed = new THREE.Color('#B53A2A'); // Reference image écorché red
+    const baseSlate = new THREE.Color('#3A3D42');         // Dark slate écorché
+    const fasciaWhite = colorTheme === 'reference' ? new THREE.Color('#F5F2EB') : new THREE.Color('#CBD5E1');
+
+    const baseColor = colorTheme === 'reference' ? baseTerracottaRed : baseSlate;
 
     for (let i = 0; i < pos.count; i++) {
       const vx = pos.getX(i);
@@ -278,7 +295,7 @@ export default function HumanMuscleModel({
       let color;
 
       if (!isHeatmapMode || !id) {
-        color = baseSlate;
+        color = baseColor;
       } else {
         const intensity = muscleIntensities[id] || 0;
 
@@ -289,9 +306,9 @@ export default function HumanMuscleModel({
         } else if (intensity > 0) {
           color = getInterpolatedHeatColor(intensity);
           const blendFactor = Math.max(0, 1 - dist);
-          color = baseSlate.clone().lerp(color, blendFactor);
+          color = baseColor.clone().lerp(color, blendFactor);
         } else {
-          color = baseSlate;
+          color = baseColor;
         }
       }
 
@@ -302,9 +319,9 @@ export default function HumanMuscleModel({
 
     bodyGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     bodyGeometry.attributes.color.needsUpdate = true;
-  }, [bodyGeometry, muscleIntensities, isHeatmapMode, selectedMuscle, hoveredMuscle, vertexMap]);
+  }, [bodyGeometry, muscleIntensities, isHeatmapMode, colorTheme, selectedMuscle, hoveredMuscle, vertexMap]);
 
-  // Gentle idle animation
+  // Gentle idle breathing animation
   useFrame((state) => {
     if (meshRef.current) {
       const t = state.clock.getElapsedTime();
@@ -364,17 +381,17 @@ export default function HumanMuscleModel({
           normalScale={new THREE.Vector2(0.85, 0.85)}
           aoMap={muscleAoMap}
           aoMapIntensity={0.6}
-          roughness={0.30}
-          metalness={0.20}
+          roughness={0.32}
+          metalness={0.15}
           wireframe={isWireframe}
-          clearcoat={0.32}
+          clearcoat={0.30}
           clearcoatRoughness={0.25}
-          reflectivity={0.6}
+          reflectivity={0.5}
         />
       </mesh>
 
-      {/* Anatomical Fascia & Tendon Accents (Matching Reference Image) */}
-      <AnatomicalFasciaOverlay />
+      {/* Anatomical Fascia & Tendon Accents (1:1 Match with Reference Image) */}
+      <AnatomicalFasciaOverlay colorTheme={colorTheme} />
 
       {/* Skeleton Wireframe Rig Overlay */}
       {showSkeleton && (

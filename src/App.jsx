@@ -13,11 +13,12 @@ import confetti from 'canvas-confetti';
 export default function App() {
   // State
   const [workoutLogs, setWorkoutLogs] = useState([]);
-  const [bodyType, setBodyType] = useState('unisex'); // Default to Unisex Fit
+  const [bodyType, setBodyType] = useState('unisex');          // Default to Unisex Fit
+  const [colorTheme, setColorTheme] = useState('reference');    // Default to Reference Image Écorché Red & White
   const [isHeatmapMode, setIsHeatmapMode] = useState(true);
   const [isWireframe, setIsWireframe] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [showLabels, setShowLabels] = useState(false); // Clean body view without muscle text
+  const [showLabels, setShowLabels] = useState(false);        // Clean body view without muscle text badges
   const [cameraPreset, setCameraPreset] = useState('front');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState(null);
@@ -192,6 +193,8 @@ export default function App() {
             onSetCameraPreset={setCameraPreset}
             bodyType={bodyType}
             onSetBodyType={setBodyType}
+            colorTheme={colorTheme}
+            onSetColorTheme={setColorTheme}
             isHeatmapMode={isHeatmapMode}
             onToggleHeatmap={() => setIsHeatmapMode(!isHeatmapMode)}
             isWireframe={isWireframe}
@@ -205,10 +208,11 @@ export default function App() {
             onSelectMuscle={setSelectedMuscle}
           />
 
-          {/* Center 3D Anatomical Grayscale & Heatmap Canvas */}
+          {/* Center 3D Anatomical Écorché Canvas */}
           <div className="flex-1 h-[550px] lg:h-[720px]">
             <AnatomyViewport
               bodyType={bodyType}
+              colorTheme={colorTheme}
               muscleIntensities={muscleIntensities}
               isHeatmapMode={isHeatmapMode}
               isWireframe={isWireframe}
