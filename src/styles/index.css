@@ -1,83 +1,14 @@
-/* VOKAN 3D Anatomy - Vanilla CSS Styling System */
-
-:root {
-  --bg-dark: #090d16;
-  --panel-bg: rgba(15, 23, 42, 0.85);
-  --panel-border: rgba(255, 255, 255, 0.08);
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
-  --accent-cyan: #00f2fe;
-  --accent-yellow: #ffd700;
-  --accent-orange: #ff5e00;
-}
-
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body {
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', 'Inter', sans-serif;
-}
-
-/* Custom Scrollbars */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
-  border-radius: 9999px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.8);
-  border-radius: 9999px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(6, 182, 212, 0.8);
-}
-
-/* Background Grid Pattern */
-.bg-grid-pattern {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-}
-
-/* Keyframe Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Utility Helpers */
-.glass-panel {
-  background: var(--panel-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--panel-border);
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #f4f6f8;
 }
